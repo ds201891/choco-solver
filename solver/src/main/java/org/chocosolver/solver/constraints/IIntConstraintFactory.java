@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,6 +12,8 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.*;
@@ -31,8 +33,7 @@ import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
-import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
-import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
+import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
 import org.chocosolver.solver.constraints.nary.channeling.*;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
@@ -51,6 +52,7 @@ import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
+import org.chocosolver.solver.constraints.nary.nvalue.PropNValue;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -869,13 +871,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Model model = itemBin[0].getModel();
         // redundant filtering
         int sum = 0;
-        for (int is : itemSize) {
-            sum += is;
+        for (int i = 0; i<itemSize.length; i++) {
+            sum += itemSize[i];
         }
-        return Constraint.merge(ConstraintsName.BINPACKING, new Constraint(ConstraintsName.BINPACKING,
-                        new PropItemToLoad(itemBin, itemSize, binLoad, offset),
-                        new PropLoadToItem(itemBin, itemSize, binLoad, offset)),
-                model.sum(binLoad, "=", sum)
+
+        int maxCapa = binLoad[0].getUB();
+        for(int j = 1; j<binLoad.length; j++) {
+            maxCapa = Math.max(maxCapa, binLoad[j].getUB());
+        }
+        int thresholdCapa = (int) Math.ceil(1.0*maxCapa/2);
+        List<IntVar> list = new ArrayList<>(itemBin.length);
+        for(int i = 0; i<itemBin.length; i++) {
+            if(itemSize[i] > thresholdCapa) {
+                list.add(itemBin[i]);
+            }
+        }
+
+        return Constraint.merge(
+            ConstraintsName.BINPACKING,
+            new Constraint(ConstraintsName.BINPACKING, new PropBinPacking(itemBin, itemSize, binLoad, offset)),
+            model.sum(binLoad, "=", sum),
+            model.allDifferent(list.toArray(new IntVar[0]))
         );
     }
 
@@ -1467,15 +1483,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * <p>
      * <p>
      * For example:<br/>
-     * - vars= (<4,2,2>,<2,3,1>,<4,2,1><1,3,0>)<br/>
+     * - vars= (<4,2,2>,<2,3,1>,<4,2,1>,<1,3,0>)<br/>
      * - SORTEDvars= (<1,3,0>,<2,3,1>,<4,2,2>,<4,2,1>)<br/>
-     * - PERMvars= (2,1,3,0)<br/>
+     * - PERMvars= (4,2,1,3)<br/>
      * - K = 2<br/>
      *
      * @param vars       a tuple of array of variables
      * @param PERMvars   array of permutation variables, domains should be [1,vars.length]  -- Can be null
      * @param SORTEDvars a tuple of array of variables sorted in increasing order
-     * @param K          key perfixes size (0 &le; k &le; m, where m is the size of the array of variable)
+     * @param K          key prefix size (0 &le; k &le; m, where m is the size of the array of variable)
      * @return a keySort constraint
      */
     default Constraint keySort(IntVar[][] vars, IntVar[] PERMvars, IntVar[][] SORTEDvars, int K) {
@@ -1672,11 +1688,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(ConstraintsName.NVALUES,
-                // at least
-                new PropAtLeastNValues(vars, vals, nValues),
-                // at most
-                new PropAtMostNValues(vars, vals, nValues),
-                new PropAMNV(vars, nValues, gci, new MDRk(gci), rules));
+            new PropNValue(vars, nValues),
+            new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
+        );
     }
 
     /**

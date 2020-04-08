@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -73,7 +73,7 @@ public class Grocery extends AbstractProblem {
         int sum = 0;
         long prod = 1;
         for (int i = 0; i < 4; i++) {
-            sum += realitemCost[i].getUB();
+            sum += (int) realitemCost[i].getUB();
             prod *= itemCost[i].getValue();
             System.out.println("item " + i + " : " + itemCost[i].getValue());
         }

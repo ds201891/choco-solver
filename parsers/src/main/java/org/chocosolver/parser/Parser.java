@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -59,6 +59,7 @@ public class Parser {
                 return;
             }
         }
+        assert instance != null;
         if (pa == 0) {
             String[] parts = instance.split("\\.");
             for (String part : parts) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,7 @@
  */
 package org.chocosolver.parser.flatzinc;
 
+import java.io.IOException;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.ParserListener;
@@ -117,8 +118,10 @@ public class Flatzinc extends RegParser {
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
             try {
-                parse(models.get(i), datas[i], new FileInputStream(new File(instance)));
-            } catch (FileNotFoundException e) {
+                FileInputStream fileInputStream = new FileInputStream(new File(instance));
+                parse(models.get(i), datas[i], fileInputStream);
+                fileInputStream.close();
+            } catch (IOException e) {
                 throw new Error(e.getMessage());
             }
         }

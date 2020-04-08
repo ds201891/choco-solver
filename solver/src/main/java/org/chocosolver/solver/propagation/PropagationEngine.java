@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -89,6 +89,15 @@ public class PropagationEngine {
      * when set to '0b10', this workds as a variable- oriented propagation engine.
      */
     private final byte hybrid;
+    /**
+     * For dynamyc addition, avoid creating a new lambda at each call
+     */
+    private final Consumer<Propagator> consumer = new Consumer<Propagator>() {
+        @Override
+        public void accept(Propagator propagator) {
+            awake_queue.addLast(propagator);
+        }
+    };
 
     /**
      * A seven-queue propagation engine.
@@ -195,7 +204,7 @@ public class PropagationEngine {
      */
     private void activatePropagators() throws ContradictionException {
         int cw = model.getEnvironment().getWorldIndex(); // get current index
-        dynPropagators.descending(cw, awake_queue::addLast);
+        dynPropagators.descending(cw, consumer);
         while (!awake_queue.isEmpty()) {
             execute(awake_queue.pollFirst());
         }

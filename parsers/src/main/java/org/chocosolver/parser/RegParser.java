@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -185,7 +185,9 @@ public abstract class RegParser implements IParser {
         defaultSettings = createDefaultSettings();
         if (settingsFile != null) {
             try {
-                defaultSettings.load(new FileInputStream(settingsFile));
+                FileInputStream fileInputStream = new FileInputStream(settingsFile);
+                defaultSettings.load(fileInputStream);
+                fileInputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

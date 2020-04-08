@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -82,9 +82,10 @@ public class MPSParser {
         this.NEG_INF = ninf;
 
         Reader reader = null;
+        GZIPInputStream gzis = null;
         if (instance.endsWith("mps.gz")) {
             FileInputStream fin = new FileInputStream(instance);
-            GZIPInputStream gzis = new GZIPInputStream(fin);
+            gzis = new GZIPInputStream(fin);
             reader = new InputStreamReader(gzis);
         } else {
             reader = new FileReader(instance);
@@ -109,6 +110,10 @@ public class MPSParser {
             }
         }
         build(model, maximize, ibex, noeq);
+        reader.close();
+        if(gzis != null) {
+            gzis.close();
+        }
     }
 
     private void readName(BufferedReader br) throws IOException {

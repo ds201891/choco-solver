@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -207,10 +207,9 @@ public class RLFAP extends AbstractProblem {
                 data[i] = domains.get(i);
                 Arrays.sort(data[i]);
             }
-
+            f.close();
             return data;
-        } catch (IOException
-                e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -236,7 +235,7 @@ public class RLFAP extends AbstractProblem {
             for (int i = 0; i < ints.size(); i++) {
                 data[i] = ints.get(i);
             }
-
+            f.close();
             return data;
         } catch (IOException
                 e) {
@@ -268,6 +267,7 @@ public class RLFAP extends AbstractProblem {
             for (int i = 0; i < ints.size(); i++) {
                 data[i] = ints.get(i);
             }
+            f.close();
             return data;
         } catch (IOException
                 e) {

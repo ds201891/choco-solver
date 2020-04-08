@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -98,7 +98,7 @@ public class EnvironmentTrailing extends AbstractEnvironment {
             throw new IllegalStateException("Commit in world 0?");
         }
         final int wi = currentWorld;
-        for (int i = trailSize; i >= 0; i--) {
+        for (int i = trailSize - 1; i >= 0; i--) {
             trails[i].worldCommit(wi);
         }
         currentWorld--;

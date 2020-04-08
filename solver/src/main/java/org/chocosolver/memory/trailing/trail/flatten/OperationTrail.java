@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -85,6 +85,10 @@ public class OperationTrail implements IOperationTrail {
      * Comits a world: merging it with the previous one.
      */
     public void worldCommit(int worldIndex) {
+        final int wsl = worldStartLevels[worldIndex];
+        while (currentLevel > wsl) {
+            valueStack[--currentLevel] = null;
+        }
     }
 
     /**
